@@ -1,3 +1,4 @@
+import { createModel } from "@xstate/test";
 import { assign, createMachine } from "xstate";
 
 type MachineContext = {
@@ -10,7 +11,7 @@ export const fanMachine = createMachine(
   {
     /** @xstate-layout N4IgpgJg5mDOIC5QDMCGA7AdLALgewAcBiAVQGUBRAJUwAUqKyzMB5AOQG0AGAXUVAJ5YASxzC86fiAAeiAIxcArJjkAWLgDZFADi5ztAZlUAmAOzGANCACeiRcsWqN2xVsULTS4wF9vVtFiwBMLopJQ09IzMLABiMdx8SCCCImISUrIIALRyigYqigCcBs6FqnIaBopKVrYI9piOzq72HkpKvn4g6HgQcFIBUimi4pJJmVnGegXFpeWV1Yq1iDnG2piFxoUaphqVW6aqBr7+GNj4BENCI+njiMaqmKZyz2UVR1MahUs2K+WYhiKZmMjiqxh2JxAAWwwTGAmuaThMnk6wMXFUz20zi4aJ2a2WCBepgBRiMck2RjKhVMnW8QA */
     id: "fan",
-    tsTypes: {} as import("./fanMachine.fsm.typegen").Typegen0,
+    // tsTypes: {} as import("./fanMachine.fsm.typegen").Typegen0,
     schema: {
       events: {} as MachineEvent,
       context: {} as MachineContext,
@@ -26,6 +27,9 @@ export const fanMachine = createMachine(
             actions: "changeFanSpeed",
           },
         },
+        meta: {
+          test: () => {},
+        },
       },
 
       spin: {
@@ -35,10 +39,14 @@ export const fanMachine = createMachine(
             actions: "changeFanSpeed",
           },
         },
+        meta: {
+          test: () => {},
+        },
       },
     },
 
     initial: "stop",
+    predictableActionArguments: true,
   },
   {
     actions: {

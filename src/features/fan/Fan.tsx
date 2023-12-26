@@ -3,7 +3,7 @@
 import { FaFan, FaDotCircle } from "react-icons/fa";
 import { motion, useTime, useTransform } from "framer-motion";
 import { useMachine } from "@xstate/react";
-import { fanMachine } from "./fan/fanMachine.fsm";
+import { fanMachine } from "./fanMachine.fsm";
 
 function cn(...classes: any[]) {
   return classes.filter(Boolean).join(" ");

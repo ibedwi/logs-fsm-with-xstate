@@ -1,0 +1,9 @@
+import { Fan } from "@/features/fan/Fan";
+
+export default function FanPage() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <Fan />
+    </main>
+  );
+}
