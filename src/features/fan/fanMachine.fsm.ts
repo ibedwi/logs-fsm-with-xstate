@@ -1,4 +1,3 @@
-import { createModel } from "@xstate/test";
 import { assign, createMachine } from "xstate";
 
 type MachineContext = {
