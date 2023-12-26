@@ -11,15 +11,13 @@ export function PhoneKeypad() {
       str: "",
     },
   });
-  const { selectedIndex, selectedIndexElement, value, isIdle } = useSelector(
-    fsm,
-    (state) => ({
-      selectedIndex: state.context.currentSelectedArrayIndex,
-      selectedIndexElement: state.context.currentSelectedSubArrayIndex,
+  const { currentCharacterGroupIndex, currentCharacterIndex, value, isIdle } =
+    useSelector(fsm, (state) => ({
+      currentCharacterGroupIndex: state.context.currentCharacterGroupIndex,
+      currentCharacterIndex: state.context.currentCharacterIndex,
       value: state.context.str,
       isIdle: state.matches("Idle"),
-    })
-  );
+    }));
 
   return (
     <div className="h-screen w-screen flex flex-col justify-center items-center">
@@ -27,9 +25,15 @@ export function PhoneKeypad() {
         <div className="w-full border border-solid col-span-3 h-[50px] max-w-[332px] flex justify-start items-center px-4">
           <p className="max-w-full overflow-x-auto flex-nowrap whitespace-nowrap">
             {value}
-            {selectedIndex != undefined &&
-              selectedIndexElement != undefined && (
-                <span>{PHONE_KEYS[selectedIndex][selectedIndexElement]}</span>
+            {currentCharacterGroupIndex != undefined &&
+              currentCharacterIndex != undefined && (
+                <span>
+                  {
+                    PHONE_KEYS[currentCharacterGroupIndex][
+                      currentCharacterIndex
+                    ]
+                  }
+                </span>
               )}
 
             <span
@@ -63,11 +67,9 @@ export function PhoneKeypad() {
             }}
             onClick={() => fsm.send({ type: "KEY.PRESSED", key: index })}
           >
-            <p className="text-2xl">{index + 1}</p>
+            <p className="text-2xl">{key[key.length - 1]}</p>
             <div className="gap-1 flex">
-              {key.map((k) => (
-                <span key={k}>{k === " " ? "_" : k}</span>
-              ))}
+              <span>{key}</span>
             </div>
           </button>
         ))}

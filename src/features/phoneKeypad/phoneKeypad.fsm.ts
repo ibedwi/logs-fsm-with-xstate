@@ -1,14 +1,14 @@
 import { assign, createMachine } from "xstate";
 import { PHONE_KEYS } from "./constant";
 
-type MachineContext = {
-  currentSelectedArrayIndex?: number;
-  currentSelectedSubArrayIndex?: number;
+export type MachineContext = {
+  currentCharacterGroupIndex?: number;
+  currentCharacterIndex?: number;
   lastPressedKey?: number;
   str: string;
 };
 
-type MachineEvent =
+export type MachineEvent =
   | {
       type: "KEY.PRESSED";
       key: number;
@@ -19,7 +19,7 @@ type MachineEvent =
 
 export const phoneKeypadMachine = createMachine(
   {
-    /** @xstate-layout N4IgpgJg5mDOIC5QAcAWB7AdmA0mAnsgIYQB0AkhADZgDEOAogJqkAKASgwMpcMAiAbQAMAXUQp0sAJYAXKVnEgAHogC0AFiGkAjADYATOoDsAVm36jAZiO6AnCYA0IfIkO7S1k2aE2jN9boAvoFOaFi4BMRkAOpEslKYUAAEAGboAE5JANYESQBGYAnJyOlwsJBJRFBxmPTMbJw8-MJiSCDIkvEKbSoIqhbuZrb6JurWQpba6iZGTi4Iuur6pOr2ABzq2j5GAUJrwaEY2HiEJKSx8YmpGdm5BUVJJWUVVTV1LBzcvILarRLScm6oF62lsa1I+i21jW5i8liEjmciEW7j8q1skzWPhG+gO7SOEVOMTiMgqcgAtmBHkRYOUILQWooOgD5JhFL1NEZSCZLLYjGtLLpLAF9IY5ohtCZwbpJSNLPo1mCfBs8WFjpEzhc5Fc0pkcvh8oUrk9aS9qglaEpYDIiKTSEQUqT0gAKExCIQASloasJUXOJIeutuBvuxtKpoglXNmEZbWZXTZPVck1IRm0a10UplthlQrW4oQ1lsK1FQl0E1BGKWJlVBJOfsoNFofAYABkGAAVBgNL7NURMzqAxPAtSGdSkNZY3TliaC6d8guS8EmOx6OeGUG6IzBEIgTDoCBwJl1jUQAcsoHKNTy8dDEZjIwV6azJEILap2yfnNrKWmIQBfZdx9eszkbMBzwTdlkSEAswRWHYvx-bRoVsWtwhA4lLmSIN9UNB4TTpKMaggocoL6bRtC5SwpVFdNRXUGF1ALJZxxlTYjFsIRJR8HkgiAk8iX9WQySkSlqQjEjWTI8ZU2nSwMyECxJ3kgsFUsUhOMFQV2IVSF1B3QIgA */
+    /** @xstate-layout N4IgpgJg5mDOIC5QAcAWB7AdmA0mAnsgIYQB0AkhADZgDEOAogJqkAKASgwMpcMAiAbQAMAXUQp0sAJYAXKVnEgAHogCMAVlLqhANlUAmIQA4dATgDMAFnPrTAdgA0IfIn07NlnecOnVp05ZGdvoAviFOaFi4BMRklDS0fAwAMgwAKgxsnDz8wmJIIMiSsvKYiioIALT6+prqbpaqQtY1xjpOLgj65kKkqk2B-nZGpkIBdmERGNh4hCSkAOpEJZhQAAQAZugATmsA1gRrAEZgUqtryNtwsJBrRFDLmPTMWdy8gqKKRdJyCgUV1Tsmjs5j0Iw0OiCNg6iHqvVUdh0OiEPiMjRBk0K02iczISxW6y2uwO+GOp3Ol2ut3uj2eLA4b1yqnyEh+pXKah0+lIlks+mC5lM+iM6nUVhhCHq5lIVmRTVUoJG9UxkRmMXm+Lk5yJ+0OJzO60psBuEDuDzOtCUsBkRBkYFIRA2du2AAptEIAJS0VU42KLZZawk7XWk-UUq7G6nmzB5L7FX5lf6uHo83nIoxGVSWdTuVQS8wirTeTP6XkBUuhcJYqKzP2a25yAC2YAuREjEFosYK3xKf1AFSsmgCJjsdmzXnURn5Ep8PJ6QlUyNBjX0pjCVcw6AgcC+2NrJDjbL7ykQlW80pBYN8Oah6nzdhlekRej8SPUz5Ve-VcWoYEPvcTftT3MaUhHMIEES8XkQIzCUDEsHlRXUDRLFMKcoSMT8a2-f0CU2YMSTJA0LgjE0zUef8Ew5Kp+gfGwp30VQGMCLMJT5BC9HRUYNCEIFQSwtVcVwu1TSbFtiHbSj2STBBBQQ0d+iY0sF3cUw72cRBwO5ED3BFUY0O6Nd1yAA */
     id: "phoneKeypad",
     tsTypes: {} as import("./phoneKeypad.fsm.typegen").Typegen0,
     context: {
@@ -40,6 +40,8 @@ export const phoneKeypadMachine = createMachine(
             actions: "onDeleteLastChar",
           },
         },
+
+        description: `The machine waiting for user's input.`,
       },
 
       "Waiting for key being pressed again": {
@@ -55,6 +57,7 @@ export const phoneKeypadMachine = createMachine(
               target: "Waiting for key being pressed again",
               internal: true,
               actions: ["assignToString", "removeSelectedKey", "onFirstPress"],
+              description: `When new key is pressed, the last selected character will be added to the context and the current selected array element is updated.`,
             },
           ],
         },
@@ -83,45 +86,44 @@ export const phoneKeypadMachine = createMachine(
   {
     actions: {
       onFirstPress: assign((context, event) => ({
-        currentSelectedArrayIndex: event.key,
-        currentSelectedSubArrayIndex: 0,
+        currentCharacterGroupIndex: event.key,
+        currentCharacterIndex: 0,
         lastPressedKey: event.key,
       })),
       onNextPress: assign((context, event) => {
         // If the current
-        if (context.currentSelectedSubArrayIndex === undefined) {
+        if (context.currentCharacterIndex === undefined) {
           return {
-            currentSelectedSubArrayIndex: 0,
+            currentCharacterIndex: 0,
           };
         }
 
         if (
-          context.currentSelectedArrayIndex != undefined &&
-          context.currentSelectedSubArrayIndex ===
-            PHONE_KEYS[context.currentSelectedArrayIndex].length - 1
+          context.currentCharacterGroupIndex != undefined &&
+          context.currentCharacterIndex ===
+            PHONE_KEYS[context.currentCharacterGroupIndex].length - 1
         ) {
           return {
-            currentSelectedSubArrayIndex: 0,
+            currentCharacterIndex: 0,
           };
         }
 
         return {
-          currentSelectedSubArrayIndex:
-            context.currentSelectedSubArrayIndex + 1,
+          currentCharacterIndex: context.currentCharacterIndex + 1,
         };
       }),
       assignToString: assign((context, event) => {
         if (
-          context.currentSelectedArrayIndex === undefined ||
-          context.currentSelectedSubArrayIndex === undefined
+          context.currentCharacterGroupIndex === undefined ||
+          context.currentCharacterIndex === undefined
         ) {
           return {};
         }
 
         const newStr =
           context.str +
-          PHONE_KEYS[context.currentSelectedArrayIndex][
-            context.currentSelectedSubArrayIndex
+          PHONE_KEYS[context.currentCharacterGroupIndex][
+            context.currentCharacterIndex
           ];
 
         return {
@@ -130,8 +132,8 @@ export const phoneKeypadMachine = createMachine(
       }),
       removeSelectedKey: assign((context, event) => {
         return {
-          currentSelectedArrayIndex: undefined,
-          currentSelectedSubArrayIndex: undefined,
+          currentCharacterGroupIndex: undefined,
+          currentCharacterIndex: undefined,
           lastPressedKey: undefined,
         };
       }),
